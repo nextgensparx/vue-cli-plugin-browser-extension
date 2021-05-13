@@ -140,12 +140,12 @@ module.exports = {
 
   - Type: `Function`
 
-  Function to modify the manifest JSON outputted by this plugin.
+  Function to modify the manifest JSON outputted by this plugin. Can optionally return a promise.
 
   An example use case is adding or removing permissions depending on which browser is being targeted.
 
   ```js
-  manifestTransformer: (manifest) => {
+  manifestTransformer: async (manifest) => {
     if (process.env.BROWSER === 'chrome') {
       manifest.permissions.push('pageCapture');
     }
