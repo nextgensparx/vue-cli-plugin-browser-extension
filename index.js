@@ -134,13 +134,29 @@ module.exports = (api, options) => {
 
   api.configureWebpack((webpackConfig) => {
     const omitUserScripts = ({ name }) => !userScripts.includes(name)
-    if (webpackConfig.optimization && webpackConfig.optimization.splitChunks && webpackConfig.optimization.splitChunks.cacheGroups) {
-      if (webpackConfig.optimization.splitChunks.cacheGroups.vendors) {
-        webpackConfig.optimization.splitChunks.cacheGroups.vendors.chunks = omitUserScripts
+    if (webpackConfig.optimization.splitChunks.cacheGroups.vendors) {
+      let chunkFn
+      const existingFn = webpackConfig.optimization.splitChunks.cacheGroups.vendors.chunks
+      if (typeof existingFn === 'function') {
+        chunkFn = (...args) => {
+          return existingFn.bind({})(...args) && omitUserScripts(...args)
+        }
+      } else {
+        chunkFn = omitUserScripts
       }
-      if (webpackConfig.optimization.splitChunks.cacheGroups.common) {
-        webpackConfig.optimization.splitChunks.cacheGroups.common.chunks = omitUserScripts
+      webpackConfig.optimization.splitChunks.cacheGroups.vendors.chunks = chunkFn
+    }
+    if (webpackConfig.optimization.splitChunks.cacheGroups.common) {
+      let chunkFn
+      const existingFn = webpackConfig.optimization.splitChunks.cacheGroups.common.chunks
+      if (typeof existingFn === 'function') {
+        chunkFn = (...args) => {
+          return existingFn.bind({})(...args) && omitUserScripts(...args)
+        }
+      } else {
+        chunkFn = omitUserScripts
       }
+      webpackConfig.optimization.splitChunks.cacheGroups.common.chunks = chunkFn
     }
   })
 }
